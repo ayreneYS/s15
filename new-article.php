@@ -1,24 +1,50 @@
 <?php
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $sql = "INSERT INTO article";
-     
-$results = mysqli_query($conn, $sql);
+require 'includes/database.php';
 
-if ($results === false) {
-    echo mysqli_error($conn);
-} else {
-    $article = mysqli_fetch_assoc($results);
-}
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    $conn = getDB();
+
+    $sql = "INSERT INTO article (title, content, published_at)
+            VALUES (?, ?, ?)";
+            
+            // -- VALUES ('" . mysqli_escape_string($conn, $_POST['title'])  . "','"
+            // --            . mysqli_escape_string($conn, $_POST['content']) . "','"
+            // --            . mysqli_escape_string($conn, $_POST['published_at']) . "')";
+
+    // $results = mysqli_query($conn, $sql);
+    $stmt = mysqli_prepare($conn, $sql);
+
+    if ($stmt === false) {
+
+        echo mysqli_error($conn);
+
+    } else {
+
+        mysqli_stmt_bind_param($stmt, "sss", $_POST['title'], $_POST['content'], $_POST['published_at']);
+
+        if (mysqli_stmt_execute($stmt)) {
+
+           $id = mysqli_insert_id($conn);
+         echo "Inserted record with ID: $id"; 
+
+        } else {
+
+            echo mysqli_stmt_error($stmt);
+        }
+
+    }
+
 }
 
 ?>
-
 <?php require 'includes/header.php'; ?>
 
 <h2>New article</h2>
 
 <form method="post">
+
     <div>
         <label for="title">Title</label>
         <input name="title" id="title" placeholder="Article title">
@@ -26,7 +52,7 @@ if ($results === false) {
 
     <div>
         <label for="content">Content</label>
-        <textarea name="content" id="content" cols="40" rows="4" placeholder="Article content"></textarea>
+        <textarea name="content" rows="4" cols="40" id="content" placeholder="Article content"></textarea>
     </div>
 
     <div>
