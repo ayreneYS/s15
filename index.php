@@ -3,6 +3,8 @@
 
 require 'includes/database.php';
 
+$conn = getDB();
+
 $sql = "SELECT *
         FROM article
         -- WHERE id = 0
